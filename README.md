@@ -5,7 +5,7 @@
 ### Block system for creating other functions
 *Sistema de blocos para criar outras funções*
 
-**[🌐 Site](https://elevbit-ai.github.io/blockz10/) · [🎬 Vídeo explicativo](https://elevbit-ai.github.io/blockz10/#video) · [📜 Especificação](SPECIFICATION.md)**
+**[🌐 Site](https://elevbit-ai.github.io/blockz10/) · [🎬 Vídeo explicativo](https://elevbit-ai.github.io/blockz10/#video) · [📜 Especificação](SPECIFICATION.md) · [⛓ Contrato oficial Block 15/5](https://github.com/elevbit-ai/block155-contract)**
 
 ![Python](https://img.shields.io/badge/Python-3.10+-00e676?style=flat-square&logo=python&logoColor=white&labelColor=060806)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES2022-00e676?style=flat-square&logo=javascript&logoColor=white&labelColor=060806)
