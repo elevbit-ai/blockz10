@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blockz10 — Block system for creating other functions</title>
+<meta name="description" content="Blockz10: sistema de blocos para criar outras funções. Codificação {e,1}, loteria de tokens e a pirâmide conservativa Block 15/5. Por Joaquim Pedro de Morais Filho.">
+<meta name="author" content="Joaquim Pedro de Morais Filho">
+<meta property="og:title" content="Blockz10">
+<meta property="og:description" content="Block system for creating other functions — criptografia, distribuição de valor e inovação em blocos.">
+<meta property="og:image" content="assets/poster.png">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='10' y='10' width='80' height='80' fill='none' stroke='%2300e676' stroke-width='12'/><text x='50' y='68' font-size='46' text-anchor='middle' fill='%2300e676' font-family='monospace'>Z</text></svg>">
+<style>
+:root{
+  --bg:#060806; --panel:#0c110d; --line:#1c2b20;
+  --green:#00e676; --green-dim:#6ec896; --txt:#ebebeb; --grey:#9aa79e;
+  --yellow:#ffeb3b; --blue:#81d4fa; --red:#f44336; --orange:#ff9800; --lgrey:#bdbdbd;
+  --mono:'Consolas','Courier New',monospace;
+  --sans:'Segoe UI',system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+a{color:var(--green);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:1060px;margin:0 auto;padding:0 22px}
+header{position:sticky;top:0;z-index:9;background:rgba(6,8,6,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav{display:flex;align-items:center;gap:18px;height:60px;flex-wrap:wrap}
+.logo{font-family:var(--mono);font-weight:700;font-size:1.25rem;color:var(--green)}
+nav a.item{color:var(--grey);font-size:.92rem}
+nav a.item:hover{color:var(--green);text-decoration:none}
+.spacer{flex:1}
+.lang button{background:none;border:1px solid var(--line);color:var(--grey);padding:4px 12px;cursor:pointer;font-family:var(--mono);border-radius:4px 0 0 4px}
+.lang button+button{border-radius:0 4px 4px 0;border-left:none}
+.lang button.on{color:#04140a;background:var(--green);border-color:var(--green);font-weight:700}
+.hero{padding:84px 0 60px;text-align:center}
+.hero h1{font-family:var(--mono);font-size:clamp(2.6rem,7vw,4.6rem);color:var(--green);letter-spacing:.02em}
+.hero .tag{font-size:clamp(1.05rem,2.6vw,1.5rem);margin-top:14px}
+.hero .sub{color:var(--grey);margin-top:8px}
+.hero .author{margin-top:30px;color:var(--green-dim);font-family:var(--mono);font-size:.95rem}
+.badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:26px}
+.badge{border:1px solid var(--line);background:var(--panel);padding:6px 14px;border-radius:20px;font-size:.82rem;color:var(--grey);font-family:var(--mono)}
+.cta{display:inline-block;margin-top:34px;background:var(--green);color:#04140a;font-weight:700;padding:13px 30px;border-radius:6px;font-size:1.02rem}
+.cta:hover{filter:brightness(1.12);text-decoration:none}
+.cta.ghost{background:none;border:1px solid var(--green);color:var(--green);margin-left:10px}
+section{padding:64px 0;border-top:1px solid var(--line)}
+h2{font-family:var(--mono);color:var(--green);font-size:1.7rem;margin-bottom:8px}
+.lead{color:var(--grey);margin-bottom:30px;max-width:760px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:22px}
+.card h3{font-size:1.02rem;color:var(--txt);margin-bottom:8px}
+.card .k{font-family:var(--mono);color:var(--yellow);font-size:.8rem;letter-spacing:.08em}
+.card p{color:var(--grey);font-size:.92rem}
+.demo{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:28px;margin-top:26px}
+.demo label{display:block;font-family:var(--mono);font-size:.85rem;color:var(--green-dim);margin-bottom:8px}
+.demo textarea,.demo input[type=text]{width:100%;background:#04120a;border:1px solid var(--line);color:var(--txt);font-family:var(--mono);font-size:1rem;padding:12px;border-radius:6px;resize:vertical}
+.demo textarea:focus,.demo input:focus{outline:1px solid var(--green)}
+.demo .out{margin-top:16px;background:#04120a;border:1px solid var(--line);border-radius:6px;padding:14px;font-family:var(--mono);word-break:break-all;min-height:52px;color:var(--green)}
+.row{display:flex;gap:12px;margin-top:14px;flex-wrap:wrap}
+button.act{background:var(--green);color:#04140a;border:none;font-weight:700;padding:10px 22px;border-radius:6px;cursor:pointer;font-size:.95rem}
+button.act.sec{background:none;border:1px solid var(--green);color:var(--green)}
+button.act:hover{filter:brightness(1.1)}
+.stat{font-family:var(--mono);color:var(--grey);font-size:.85rem;margin-top:10px}
+.warn{margin-top:18px;border-left:3px solid var(--yellow);background:#141204;padding:12px 16px;font-size:.88rem;color:#e8dfa0;border-radius:0 6px 6px 0}
+.pyr{display:flex;flex-direction:column;gap:10px;align-items:flex-start;margin:26px 0}
+.prow{display:flex;gap:10px;align-items:center}
+.plabel{width:26px;font-family:var(--mono);font-weight:700;text-align:right}
+.blk{width:58px;height:58px;border:4px solid;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700;color:var(--green);background:#04120a;border-radius:4px;transition:transform .2s}
+.blk:hover{transform:scale(1.08)}
+table.dist{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.92rem;margin-top:10px}
+table.dist th,table.dist td{border:1px solid var(--line);padding:9px 12px;text-align:left}
+table.dist th{color:var(--green-dim);background:#0a140e}
+table.dist td.g{color:var(--green)}
+.total{font-family:var(--mono);font-size:1.25rem;color:var(--green);margin-top:18px}
+video{width:100%;border-radius:12px;border:1px solid var(--line);background:#000;display:block}
+.author-card{display:flex;gap:26px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:30px;flex-wrap:wrap}
+.avatar{width:92px;height:92px;border-radius:50%;background:#04140a;border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:2.2rem;color:var(--green);font-weight:700;flex-shrink:0}
+.author-card h3{font-size:1.3rem}
+.author-card .contact{font-family:var(--mono);color:var(--green);margin-top:6px}
+.author-card p{color:var(--grey);margin-top:10px;font-size:.95rem;max-width:640px}
+pre.code{background:#04120a;border:1px solid var(--line);border-radius:8px;padding:18px;overflow-x:auto;font-family:var(--mono);font-size:.88rem;color:var(--txt);margin-top:16px}
+pre.code .c{color:#5a7a66}.code .g{color:var(--green)}
+footer{border-top:1px solid var(--line);padding:36px 0;text-align:center;color:var(--grey);font-size:.85rem}
+footer .sig{font-family:var(--mono);color:var(--green-dim);margin-top:6px}
+[data-en]{display:none}
+html.en [data-pt]{display:none}
+html.en [data-en]{display:revert}
+@media(max-width:640px){.hero{padding:56px 0 40px}.blk{width:44px;height:44px;font-size:.85rem}}
+</style>
+</head>
+<body>
+
+<header><div class="wrap"><nav>
+  <span class="logo">«Blockz10»</span>
+  <a class="item" href="#conceito" data-pt>Conceito</a><a class="item" href="#conceito" data-en>Concept</a>
+  <a class="item" href="#encoder">Encoder</a>
+  <a class="item" href="#pyramid">Block 15/5</a>
+  <a class="item" href="#video" data-pt>Vídeo</a><a class="item" href="#video" data-en>Video</a>
+  <a class="item" href="#autor" data-pt>Autor</a><a class="item" href="#autor" data-en>Author</a>
+  <span class="spacer"></span>
+  <span class="lang"><button id="btn-pt" class="on" onclick="setLang('pt')">PT</button><button id="btn-en" onclick="setLang('en')">EN</button></span>
+  <a class="item" href="https://github.com/elevbit-ai/blockz10">GitHub ↗</a>
+</nav></div></header>
+
+<div class="hero wrap">
+  <h1>«Blockz10»</h1>
+  <p class="tag" data-pt>Sistema de blocos para criar outras funções</p>
+  <p class="tag" data-en>Block system for creating other functions</p>
+  <p class="sub" data-pt>Codificação, criptografia aplicada e distribuição conservativa de valor — a partir de regras mínimas sobre estruturas finitas.</p>
+  <p class="sub" data-en>Encoding, applied cryptography and conservative value distribution — from minimal rules over finite structures.</p>
+  <p class="author">Joaquim Pedro de Morais Filho · j360074@hotmail.com · 2020–2026</p>
+  <div class="badges">
+    <span class="badge">Python 3</span><span class="badge">JavaScript</span>
+    <span class="badge">12/12 tests ✓</span><span class="badge">MIT License</span>
+    <span class="badge" data-pt>registrado on-chain (NFT)</span><span class="badge" data-en>registered on-chain (NFT)</span>
+  </div>
+  <div>
+    <a class="cta" href="#video" data-pt>▶ Assistir ao vídeo (60s)</a>
+    <a class="cta" href="#video" data-en>▶ Watch the video (60s)</a>
+    <a class="cta ghost" href="https://github.com/elevbit-ai/blockz10" data-pt>Código-fonte</a>
+    <a class="cta ghost" href="https://github.com/elevbit-ai/blockz10" data-en>Source code</a>
+  </div>
+</div>
+
+<section id="conceito"><div class="wrap">
+  <h2 data-pt># O conceito</h2><h2 data-en># The concept</h2>
+  <p class="lead" data-pt>Toda função do Blockz10 nasce do mesmo gesto: blocos discretos, uma estrutura fixa e uma regra local. A regra aplicada à estrutura gera a função — compressão, decriptação-prêmio ou redistribuição de valor.</p>
+  <p class="lead" data-en>Every Blockz10 function is born from the same gesture: discrete blocks, a fixed structure and a local rule. The rule applied to the structure yields the function — compression, prize decryption or value redistribution.</p>
+  <div class="grid">
+    <div class="card"><div class="k">01 · BLOCO / BLOCK</div>
+      <h3 data-pt>Unidade mínima</h3><h3 data-en>Minimal unit</h3>
+      <p data-pt>Cada bloco carrega um valor e um endereço — um caractere <b>e/1</b>, ou uma célula de valor 10 apontando para um nível.</p>
+      <p data-en>Each block carries a value and an address — an <b>e/1</b> character, or a value-10 cell pointing to a level.</p></div>
+    <div class="card"><div class="k">02 · ESTRUTURA / STRUCTURE</div>
+      <h3 data-pt>Arranjo finito</h3><h3 data-en>Finite arrangement</h3>
+      <p data-pt>Uma string de 64 símbolos ou uma pirâmide de 15 blocos em 5 níveis. Nunca aberto, nunca infinito — o fechamento é o que permite conservação.</p>
+      <p data-en>A 64-symbol string or a pyramid of 15 blocks in 5 levels. Never open, never infinite — closure is what enables conservation.</p></div>
+    <div class="card"><div class="k">03 · REGRA / RULE</div>
+      <h3 data-pt>Aritmética local</h3><h3 data-en>Local arithmetic</h3>
+      <p data-pt>Contar repetições, dividir totais, redistribuir cotas. Regras simples o bastante para caber num contrato — e serem auditáveis.</p>
+      <p data-en>Count repetitions, divide totals, redistribute quotas. Rules simple enough to fit in a contract — and be auditable.</p></div>
+    <div class="card"><div class="k">04 · FUNÇÃO / FUNCTION</div>
+      <h3 data-pt>O que emerge</h3><h3 data-en>What emerges</h3>
+      <p data-pt>Compressão sem perda, loterias verificáveis, splits determinísticos de pagamento, tokenomics de sistema fechado.</p>
+      <p data-en>Lossless compression, verifiable lotteries, deterministic payment splits, closed-system tokenomics.</p></div>
+  </div>
+</div></section>
+
+<section id="encoder"><div class="wrap">
+  <h2 data-pt># Codificação {e, 1} — demo ao vivo</h2><h2 data-en># The {e, 1} encoding — live demo</h2>
+  <p class="lead" data-pt>Sequências de <b>e</b> viram um dígito de contagem; <b>1</b> permanece literal: <code style="font-family:var(--mono);color:var(--green)">eee11 → 311</code>. Como <b>e</b> e <b>1</b> são dígitos hexadecimais válidos, uma string {e,1} de 64 caracteres é simultaneamente uma chave privada Ethereum sintaticamente válida e uma mensagem comprimível.</p>
+  <p class="lead" data-en>Runs of <b>e</b> become a counting digit; <b>1</b> stays literal: <code style="font-family:var(--mono);color:var(--green)">eee11 → 311</code>. Since <b>e</b> and <b>1</b> are valid hex digits, a 64-char {e,1} string is simultaneously a syntactically valid Ethereum private key and a compressible message.</p>
+  <div class="demo">
+    <label data-pt>ENTRADA — string {e,1}</label><label data-en>INPUT — {e,1} string</label>
+    <textarea id="enc-in" rows="2" spellcheck="false">111e1ee1e1eeeee11111ee1111e11e11111e11e1e111e11ee11e1111ee1e1eee</textarea>
+    <div class="row">
+      <button class="act" onclick="doEncode()" data-pt>Codificar →</button>
+      <button class="act" onclick="doEncode()" data-en>Encode →</button>
+      <button class="act sec" onclick="doDecode()" data-pt>← Decodificar</button>
+      <button class="act sec" onclick="doDecode()" data-en>← Decode</button>
+      <button class="act sec" onclick="doRandom()" data-pt>⚄ Gerar chave aleatória</button>
+      <button class="act sec" onclick="doRandom()" data-en>⚄ Generate random key</button>
+    </div>
+    <div class="out" id="enc-out">—</div>
+    <div class="stat" id="enc-stat"></div>
+    <div class="warn" data-pt><b>Nota de segurança:</b> uma chave restrita a {e,1} tem 64 bits de entropia (não 256). Isso é proposital nas construções de puzzle e loteria — a chave deve ser descobrível. Nunca a use para custódia de fundos reais.</div>
+    <div class="warn" data-en><b>Security note:</b> an {e,1}-restricted key carries 64 bits of entropy (not 256). That is intentional in puzzle and lottery constructions — the key must be discoverable. Never use it to store real funds.</div>
+  </div>
+</div></section>
+
+<section id="pyramid"><div class="wrap">
+  <h2 data-pt># Block 15/5 — a anti-pirâmide</h2><h2 data-en># Block 15/5 — the anti-pyramid</h2>
+  <p class="lead" data-pt>15 blocos de valor 10 em 5 níveis, mais o bloco de origem (nível 0, valor 0). Total: <b>150</b>. Cada nível divide seu total entre níveis receptores. Diferente da pirâmide financeira clássica, o sistema é <b>fechado e conservativo</b>: o topo vale zero, o valor flui para a base e a soma sempre retorna — a menos da poeira de arredondamento, que é rastreada, não perdida.</p>
+  <p class="lead" data-en>15 value-10 blocks in 5 levels, plus the origin block (level 0, value 0). Total: <b>150</b>. Each level divides its total among receptor levels. Unlike the classic financial pyramid, the system is <b>closed and conservative</b>: the top holds zero, value flows to the base and the sum always returns — up to rounding dust, which is tracked, not lost.</p>
+  <div class="demo">
+    <div class="pyr" id="pyr"></div>
+    <div class="row">
+      <button class="act" onclick="runDist()" data-pt>▶ Executar distribuição</button>
+      <button class="act" onclick="runDist()" data-en>▶ Run distribution</button>
+      <button class="act sec" onclick="resetDist()" data-pt>↺ Reiniciar</button>
+      <button class="act sec" onclick="resetDist()" data-en>↺ Reset</button>
+    </div>
+    <div id="dist-result"></div>
+  </div>
+</div></section>
+
+<section id="video"><div class="wrap">
+  <h2 data-pt># Vídeo explicativo</h2><h2 data-en># Explainer video</h2>
+  <p class="lead" data-pt>60 segundos: o conceito, a codificação, a pirâmide e as aplicações.</p>
+  <p class="lead" data-en>60 seconds: the concept, the encoding, the pyramid and the applications.</p>
+  <video controls preload="metadata" poster="assets/poster.png">
+    <source src="assets/blockz10-explainer.mp4" type="video/mp4">
+  </video>
+</div></section>
+
+<section id="uso"><div class="wrap">
+  <h2 data-pt># Uso rápido</h2><h2 data-en># Quick start</h2>
+  <pre class="code"><span class="c"># Python</span>
+<span class="g">&gt;&gt;&gt;</span> from blockz10 import encode, decode, Block155
+<span class="g">&gt;&gt;&gt;</span> encode("eee11")
+'311'
+<span class="g">&gt;&gt;&gt;</span> r = Block155().distribute()
+<span class="g">&gt;&gt;&gt;</span> r.total_in, r.conserved
+(150.0, True)</pre>
+  <p class="lead" style="margin-top:22px" data-pt>Implementações de referência em Python e JavaScript, com 12 testes cobrindo round-trip da codificação e conservação de valor. Especificação formal completa em <a href="https://github.com/elevbit-ai/blockz10/blob/main/SPECIFICATION.md">SPECIFICATION.md</a>.</p>
+  <p class="lead" style="margin-top:22px" data-en>Reference implementations in Python and JavaScript, with 12 tests covering encoding round-trips and value conservation. Full formal specification in <a href="https://github.com/elevbit-ai/blockz10/blob/main/SPECIFICATION.md">SPECIFICATION.md</a>.</p>
+</div></section>
+
+<section id="autor"><div class="wrap">
+  <h2 data-pt># Autor</h2><h2 data-en># Author</h2>
+  <div class="author-card">
+    <div class="avatar">JP</div>
+    <div>
+      <h3>Joaquim Pedro de Morais Filho</h3>
+      <div class="contact">j360074@hotmail.com</div>
+      <p data-pt>Criador do sistema Blockz10 (2020) e do modelo de distribuição Block 15/5 (2022). O conceito foi registrado on-chain como NFT na rede Ethereum (coleção Blockz10 · OpenSea) e documentado publicamente desde a origem em <a href="https://blockz10.blogspot.com">blockz10.blogspot.com</a>.</p>
+      <p data-en>Creator of the Blockz10 system (2020) and the Block 15/5 distribution model (2022). The concept was registered on-chain as an NFT on Ethereum (Blockz10 collection · OpenSea) and publicly documented since its origin at <a href="https://blockz10.blogspot.com">blockz10.blogspot.com</a>.</p>
+    </div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <div data-pt>© 2020–2026 Joaquim Pedro de Morais Filho · Licença MIT · conceito registrado on-chain</div>
+  <div data-en>© 2020–2026 Joaquim Pedro de Morais Filho · MIT License · concept registered on-chain</div>
+  <div class="sig">«Blockz10» — block system for creating other functions</div>
+</div></footer>
+
+<script>
+/* ---------- language ---------- */
+function setLang(l){
+  document.documentElement.classList.toggle('en', l==='en');
+  document.getElementById('btn-pt').classList.toggle('on', l==='pt');
+  document.getElementById('btn-en').classList.toggle('on', l==='en');
+  try{localStorage.setItem('blockz10-lang', l);}catch(e){}
+}
+try{
+  const saved = localStorage.getItem('blockz10-lang');
+  if(saved) setLang(saved);
+  else if((navigator.language||'').toLowerCase().indexOf('pt')!==0) setLang('en');
+}catch(e){}
+
+/* ---------- Blockz10 encoding (mirrors src/blockz10/encoding.py) ---------- */
+function bzEncode(s){
+  if(!/^[e1]+$/.test(s)) throw new Error('alphabet');
+  let out='', i=0;
+  while(i<s.length){
+    const c=s[i]; let j=i;
+    while(j<s.length && s[j]===c) j++;
+    let run=j-i;
+    if(c==='e'){
+      while(run>9){out+='9';run-=9;}
+      out+= run===1 ? 'e' : String(run);
+    } else out+='1'.repeat(run);
+    i=j;
+  }
+  return out;
+}
+function bzDecode(s){
+  if(!/^[e1-9]+$/.test(s)) throw new Error('symbols');
+  let out='';
+  for(const c of s){
+    if(c==='1') out+='1';
+    else if(c==='e') out+='e';
+    else out+='e'.repeat(+c);
+  }
+  return out;
+}
+const $=id=>document.getElementById(id);
+function doEncode(){
+  const s=$('enc-in').value.trim();
+  try{
+    const r=bzEncode(s);
+    $('enc-out').textContent=r;
+    $('enc-stat').textContent=`${s.length} → ${r.length} ${document.documentElement.classList.contains('en')?'symbols · lossless':'símbolos · sem perda'}`;
+  }catch(e){ $('enc-out').textContent='⚠ alfabeto {e,1} apenas / {e,1} alphabet only'; $('enc-stat').textContent=''; }
+}
+function doDecode(){
+  const s=$('enc-in').value.trim();
+  try{
+    const r=bzDecode(s);
+    $('enc-out').textContent=r;
+    $('enc-stat').textContent=`${s.length} → ${r.length}`;
+  }catch(e){ $('enc-out').textContent='⚠ símbolos válidos: e, 1–9 / valid symbols: e, 1–9'; $('enc-stat').textContent=''; }
+}
+function doRandom(){
+  const a=new Uint8Array(64); crypto.getRandomValues(a);
+  $('enc-in').value=[...a].map(b=>b&1?'1':'e').join('');
+  doEncode();
+}
+doEncode();
+
+/* ---------- Block 15/5 simulator (EXAMPLE_RULES, truncation .2) ---------- */
+const COLORS={0:'#bdbdbd',1:'#ffeb3b',2:'#81d4fa',3:'#f44336',4:'#ff9800',5:'#4cff50'};
+const RULES={0:[2,[1,2]],1:[3,[2,3,4]],2:[3,[3,4,5]],3:[4,[1,2,4,5]],4:[2,[3,5]],5:[3,[0,1,2]]};
+const trunc=x=>Math.trunc(x*100)/100;
+function buildPyr(values){
+  const el=$('pyr'); el.innerHTML='';
+  for(let lv=0;lv<=5;lv++){
+    const row=document.createElement('div'); row.className='prow';
+    const lab=document.createElement('span'); lab.className='plabel';
+    lab.textContent=lv; lab.style.color=COLORS[lv]; row.appendChild(lab);
+    const n=Math.max(1,lv);
+    for(let b=0;b<n;b++){
+      const d=document.createElement('div'); d.className='blk';
+      d.style.borderColor=COLORS[lv];
+      d.textContent= values ? values[lv] : (lv===0?'0':'10');
+      row.appendChild(d);
+    }
+    el.appendChild(row);
+  }
+}
+function runDist(){
+  const en=document.documentElement.classList.contains('en');
+  const recv={0:0,1:0,2:0,3:0,4:0,5:0};
+  const rows=[];
+  for(let lv=0;lv<=5;lv++){
+    const total=lv*10, [div,recs]=RULES[lv], q=trunc(total/div);
+    recs.forEach(r=>recv[r]+=q);
+    rows.push(`<tr><td style="color:${COLORS[lv]}">${en?'level':'nível'} ${lv}</td><td>${total} ÷ ${div}</td><td class="g">${q.toFixed(2)}</td><td>→ ${recs.join(', ')}</td></tr>`);
+  }
+  const out=Object.values(recv).reduce((a,b)=>a+b,0);
+  const dust=(150-out);
+  const perLevel={}; for(let lv=0;lv<=5;lv++) perLevel[lv]=recv[lv].toFixed(2).replace(/\.00$/,'');
+  buildPyr(perLevel);
+  $('dist-result').innerHTML=
+    `<table class="dist"><tr><th>${en?'level':'nível'}</th><th>${en?'division':'divisão'}</th><th>${en?'quota':'cota'}</th><th>${en?'receptors':'receptores'}</th></tr>${rows.join('')}</table>`+
+    `<div class="total">Σ ${en?'received':'recebido'} = ${out.toFixed(2)} &nbsp;·&nbsp; ${en?'dust':'poeira'} = ${dust.toFixed(2)} &nbsp;·&nbsp; 150 ✓</div>`;
+}
+function resetDist(){ buildPyr(null); $('dist-result').innerHTML=''; }
+buildPyr(null);
+</script>
+</body>
+</html>
