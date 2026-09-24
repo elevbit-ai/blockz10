@@ -87,10 +87,12 @@ de recrutamento.
 (150.0, True, 0.03)
 ```
 
-> 🧠 **A pirâmide também aprende / the pyramid also learns:**
+> 🧠 **A pirâmide também aprende, conversa e vive on-chain / the pyramid
+> also learns, chats and lives on-chain:**
 > [elevbit-ai/blockz10-neural](https://github.com/elevbit-ai/blockz10-neural) —
 > rede neural construída só de blocos (redistribuição + bônus por limiar),
-> com laboratório de treino ao vivo em
+> com laboratório de treino ao vivo, chat roteado pela pirâmide e
+> inferência on-chain em Solidity:
 > [elevbit-ai.github.io/blockz10-neural](https://elevbit-ai.github.io/blockz10-neural/).
 
 ## Instalação / Install
