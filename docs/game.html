@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blockz10 Arcade — treino de QI cripto / crypto IQ training</title>
+<meta name="description" content="Blockz10 Arcade: mate letras no tabuleiro com o teclado, vença fases geradas e aumente seu QI de criptografia — alfabeto {e,1}, hexadecimal, codificação 311 e anagramas. Por Joaquim Pedro de Morais Filho.">
+<meta name="author" content="Joaquim Pedro de Morais Filho">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='10' y='10' width='80' height='80' fill='none' stroke='%23ffd54f' stroke-width='12'/><text x='50' y='68' font-size='46' text-anchor='middle' fill='%23ffd54f' font-family='monospace'>Q</text></svg>">
+<style>
+:root{
+  --bg:#060806; --panel:#0c110d; --line:#1c2b20;
+  --green:#00e676; --green-dim:#6ec896; --txt:#ebebeb; --grey:#9aa79e;
+  --gold:#ffd54f; --blue:#81d4fa; --red:#f44336;
+  --mono:'Consolas','Courier New',monospace;
+  --sans:'Segoe UI',system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.5;min-height:100vh}
+a{color:var(--green);text-decoration:none}
+.wrap{max-width:900px;margin:0 auto;padding:0 18px}
+header{border-bottom:1px solid var(--line);background:rgba(6,8,6,.92)}
+nav{display:flex;align-items:center;gap:16px;height:56px;flex-wrap:wrap}
+.logo{font-family:var(--mono);font-weight:700;font-size:1.05rem;color:var(--gold)}
+nav a.item{color:var(--grey);font-size:.9rem}
+nav a.item:hover{color:var(--gold)}
+.spacer{flex:1}
+.lang button{background:none;border:1px solid var(--line);color:var(--grey);padding:3px 10px;cursor:pointer;font-family:var(--mono);border-radius:4px 0 0 4px}
+.lang button+button{border-radius:0 4px 4px 0;border-left:none}
+.lang button.on{color:#141002;background:var(--gold);border-color:var(--gold);font-weight:700}
+
+.hud{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0 14px}
+.stat{flex:1;min-width:120px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;text-align:center}
+.stat .k{font-family:var(--mono);font-size:.68rem;color:var(--grey);letter-spacing:.1em}
+.stat .v{font-family:var(--mono);font-weight:700;font-size:1.5rem;color:var(--green)}
+.stat .v.gold{color:var(--gold)}
+.stat .v.warn{color:var(--red)}
+#timebar{height:6px;background:#04120a;border-radius:3px;overflow:hidden;margin:0 0 16px}
+#timefill{height:100%;background:var(--green);width:100%;transition:width .2s linear}
+
+.mission{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:8px;padding:12px 16px;margin-bottom:14px}
+.mission .ph{font-family:var(--mono);color:var(--gold);font-weight:700;font-size:.95rem}
+.mission .goal{font-size:.95rem;margin-top:2px}
+.mission .fact{font-size:.78rem;color:var(--grey);margin-top:6px;font-style:italic}
+.seq{font-family:var(--mono);font-size:1.3rem;letter-spacing:.35em;color:var(--blue);margin-top:6px;min-height:1.4em}
+.seq b{color:var(--green)}
+
+#board{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;background:#04120a;border:1px solid var(--line);border-radius:12px;padding:16px;user-select:none}
+.tile{aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-weight:700;font-size:clamp(1.1rem,3.4vw,1.7rem);
+  background:#0a0e08;border:3px solid var(--gold);color:var(--gold);border-radius:8px;
+  cursor:pointer;transition:transform .08s,opacity .18s,border-color .15s,color .15s}
+.tile:hover{transform:scale(1.07)}
+.tile.dead{opacity:0;transform:scale(.3) rotate(25deg);pointer-events:none}
+.tile.pop{animation:pop .25s}
+.tile.err{border-color:var(--red);color:var(--red);animation:shake .3s}
+.tile.empty{background:transparent;border-color:#101a12;cursor:default;color:transparent}
+.tile.empty:hover{transform:none}
+@keyframes pop{0%{transform:scale(.4)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+.row{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;align-items:center;justify-content:center}
+button.act{background:var(--gold);color:#141002;border:none;font-weight:700;padding:12px 28px;border-radius:6px;cursor:pointer;font-size:1rem}
+button.act.sec{background:none;border:1px solid var(--gold);color:var(--gold)}
+button.act:hover{filter:brightness(1.1)}
+.hint{color:var(--grey);font-size:.82rem;text-align:center;margin-top:12px;font-family:var(--mono)}
+
+#overlay{position:fixed;inset:0;background:rgba(4,6,4,.93);display:flex;align-items:center;justify-content:center;z-index:20}
+#overlay.hide{display:none}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:38px;max-width:560px;text-align:center;margin:0 18px}
+.panel h1{font-family:var(--mono);color:var(--gold);font-size:1.9rem;margin-bottom:10px}
+.panel p{color:var(--grey);font-size:.95rem;margin-bottom:8px}
+.panel .big{font-family:var(--mono);font-size:3rem;color:var(--green);font-weight:700;margin:14px 0 2px}
+.panel .lbl{font-family:var(--mono);font-size:.75rem;color:var(--grey);letter-spacing:.12em}
+.panel .rank{font-family:var(--mono);color:var(--blue);margin:8px 0 4px;font-size:1.05rem}
+.flash{position:fixed;top:70px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-weight:700;
+  font-size:1.1rem;pointer-events:none;z-index:30;opacity:0;transition:opacity .15s,top .5s}
+footer{border-top:1px solid var(--line);margin-top:34px;padding:20px 0;text-align:center;color:var(--grey);font-size:.8rem}
+footer .sig{font-family:var(--mono);color:#c8b06e;margin-top:4px}
+[data-en]{display:none}
+html.en [data-pt]{display:none}
+html.en [data-en]{display:revert}
+@media(max-width:560px){#board{grid-template-columns:repeat(6,1fr);gap:7px;padding:10px}}
+</style>
+</head>
+<body>
+
+<header><div class="wrap"><nav>
+  <span class="logo">«Blockz10 Arcade»</span>
+  <a class="item" href="index.html" data-pt>← Blockz10</a><a class="item" href="index.html" data-en>← Blockz10</a>
+  <span class="spacer"></span>
+  <span class="lang"><button id="btn-pt" class="on" onclick="setLang('pt')">PT</button><button id="btn-en" onclick="setLang('en')">EN</button></span>
+  <a class="item" href="https://github.com/elevbit-ai/blockz10">GitHub ↗</a>
+</nav></div></header>
+
+<div class="wrap">
+  <div class="hud">
+    <div class="stat"><div class="k">QI CRIPTO / CRYPTO IQ</div><div class="v gold" id="hud-qi">100</div></div>
+    <div class="stat"><div class="k" data-pt>FASE</div><div class="k" data-en>PHASE</div><div class="v" id="hud-fase">1</div></div>
+    <div class="stat"><div class="k" data-pt>TEMPO DA FASE</div><div class="k" data-en>PHASE TIME</div><div class="v" id="hud-timer">30.0</div></div>
+    <div class="stat"><div class="k" data-pt>CRONÔMETRO</div><div class="k" data-en>CHRONOMETER</div><div class="v" id="hud-chrono" style="color:var(--blue)">0:00</div></div>
+    <div class="stat"><div class="k" data-pt>COMBO</div><div class="k" data-en>COMBO</div><div class="v" id="hud-combo">×1</div></div>
+  </div>
+  <div id="timebar"><div id="timefill"></div></div>
+
+  <div class="mission">
+    <div class="ph" id="m-title">—</div>
+    <div class="goal" id="m-goal">—</div>
+    <div class="seq" id="m-seq"></div>
+    <div class="fact" id="m-fact"></div>
+  </div>
+
+  <div id="board"></div>
+  <div class="hint" data-pt>⌨ digite a letra para matá-la · 🖱 ou clique no tile · erro custa QI e tempo</div>
+  <div class="hint" data-en>⌨ type the letter to kill it · 🖱 or click the tile · mistakes cost IQ and time</div>
+</div>
+
+<div id="overlay">
+  <div class="panel" id="panel-start">
+    <h1>«Blockz10 Arcade»</h1>
+    <p data-pt><b style="color:var(--txt)">Treino de QI cripto.</b> Mate as letras certas do tabuleiro — pelo teclado ou pelo clique. Cada tile morto some e novos nascem. Vença a missão antes do tempo acabar e uma nova fase é gerada, mais difícil. Cada fase treina um conceito real do sistema Blockz10.</p>
+    <p data-en><b style="color:var(--txt)">Crypto IQ training.</b> Kill the right letters on the board — by keyboard or by click. Each dead tile vanishes and new ones spawn. Beat the mission before time runs out and a new, harder phase is generated. Each phase trains a real Blockz10 concept.</p>
+    <p style="font-family:var(--mono);font-size:.8rem;color:var(--green-dim)" data-pt>fases: caça {e,1} · só hexadecimal · codificação 311 · anagrama cripto</p>
+    <p style="font-family:var(--mono);font-size:.8rem;color:var(--green-dim)" data-en>phases: {e,1} hunt · hex only · 311 encoding · crypto anagram</p>
+    <div class="row"><button class="act" onclick="startGame()" data-pt>▶ JOGAR</button><button class="act" onclick="startGame()" data-en>▶ PLAY</button></div>
+    <p class="lbl" style="margin-top:18px" id="best-line"></p>
+  </div>
+  <div class="panel" id="panel-over" style="display:none">
+    <h1 data-pt>FIM DE JOGO</h1><h1 data-en>GAME OVER</h1>
+    <div class="lbl" data-pt>SEU QI CRIPTO</div><div class="lbl" data-en>YOUR CRYPTO IQ</div>
+    <div class="big" id="f-qi">0</div>
+    <div class="rank" id="f-rank"></div>
+    <p id="f-stats" style="font-family:var(--mono);font-size:.85rem"></p>
+    <p id="f-best" class="lbl"></p>
+    <div class="row">
+      <button class="act" onclick="startGame()" data-pt>↻ JOGAR DE NOVO</button>
+      <button class="act" onclick="startGame()" data-en>↻ PLAY AGAIN</button>
+    </div>
+  </div>
+</div>
+
+<div class="flash" id="flash"></div>
+
+<footer><div class="wrap">
+  <div data-pt>© 2020–2026 Joaquim Pedro de Morais Filho · «Blockz10» — block system for creating other functions</div>
+  <div data-en>© 2020–2026 Joaquim Pedro de Morais Filho · «Blockz10» — block system for creating other functions</div>
+  <div class="sig">j360074@hotmail.com</div>
+</div></footer>
+
+<script>
+/* ---------------- language ---------------- */
+function setLang(l){
+  document.documentElement.classList.toggle('en', l==='en');
+  document.getElementById('btn-pt').classList.toggle('on', l==='pt');
+  document.getElementById('btn-en').classList.toggle('on', l==='en');
+  try{localStorage.setItem('bz-arcade-lang', l);}catch(e){}
+  if(state.phase) describeMission();
+  showBest();
+}
+const EN = () => document.documentElement.classList.contains('en');
+const $ = id => document.getElementById(id);
+
+/* ---------------- Blockz10 canonical encode (eee11 -> 311) ---------------- */
+function bzEncode(s){
+  let out='', i=0;
+  while(i<s.length){
+    const c=s[i]; let j=i;
+    while(j<s.length && s[j]===c) j++;
+    let run=j-i;
+    if(c==='e'){ while(run>9){out+='9';run-=9;} out+= run===1?'e':String(run); }
+    else out+='1'.repeat(run);
+    i=j;
+  }
+  return out;
+}
+
+/* ---------------- game state ---------------- */
+const COLS_DESK = 8, ROWS = 4;
+const CELLS = 32;
+const WORDS = ['HASH','CHAVE','SALT','HMAC','BLOCO','TOKEN','CIFRA','NONCE','SHA256','PBKDF2','ANAGRAMA','ENTROPIA'];
+const HEX = '0123456789abcdef', NONHEX = 'ghijklmnopqrstuvwxyz';
+const state = { running:false, phase:0, qi:100, combo:1, kills:0, errors:0,
+  timeLeft:0, timeMax:0, chrono:0, tiles:[], mode:null, need:[], needPos:0,
+  targetsLeft:0, lastTick:0 };
+
+/* ---------------- phase generation ---------------- */
+function genPhase(n){
+  const mode = (n-1) % 4;                       // cycle the 4 mission types
+  const lvl = Math.ceil(n/4);                   // difficulty tier
+  state.mode = mode;
+  state.timeMax = Math.max(12, 30 - (n-1)*1.5);
+  state.timeLeft = state.timeMax;
+  state.need = []; state.needPos = 0;
+  const tiles = new Array(CELLS).fill(null);
+
+  const put = (ch, cls) => {
+    let k, tries=0;
+    do { k = Math.floor(Math.random()*CELLS); } while(tiles[k] && ++tries<200);
+    if(tiles[k]) return;
+    tiles[k] = { ch, target: cls };
+  };
+
+  if(mode===0){ // hunt {e,1}
+    state.targetsLeft = 8 + Math.min(10, lvl*2);
+    const nT = Math.min(10, 5 + lvl);
+    for(let i=0;i<nT;i++) put(Math.random()<.5?'e':'1', true);
+    const nD = Math.min(CELLS-nT, 10 + lvl*3);
+    for(let i=0;i<nD;i++) put(randOf('abcdfghjkmnpqrstuvwxyz23456789'), false);
+  }
+  else if(mode===1){ // hex only
+    state.targetsLeft = 8 + Math.min(10, lvl*2);
+    const nT = Math.min(10, 5 + lvl);
+    for(let i=0;i<nT;i++) put(randOf(HEX), true);
+    const nD = Math.min(CELLS-nT, 10 + lvl*3);
+    for(let i=0;i<nD;i++) put(randOf(NONHEX), false);
+  }
+  else if(mode===2){ // encode: kill the Blockz10 form of a shown {e,1} string, in order
+    let src=''; const len = Math.min(9, 4 + lvl);
+    for(let i=0;i<len;i++) src += Math.random()<.55?'e':'1';
+    state.src = src;
+    state.need = [...bzEncode(src)];
+    state.targetsLeft = state.need.length;
+    for(const ch of state.need) put(ch, true);
+    const nD = Math.min(CELLS - state.need.length, 8 + lvl*3);
+    for(let i=0;i<nD;i++) put(randOf('045678abcdfghjkmpqrstuvwxyz'), false);
+  }
+  else { // anagram: spell a crypto word in order
+    const w = WORDS[Math.floor(Math.random()*Math.min(WORDS.length, 4+lvl*2))];
+    state.word = w;
+    state.need = [...w.toLowerCase()];
+    state.targetsLeft = state.need.length;
+    for(const ch of state.need) put(ch, true);
+    const nD = Math.min(CELLS - state.need.length, 8 + lvl*3);
+    for(let i=0;i<nD;i++) put(randOf('abcdefghjkmnopqrstuvwxyz0123456789'), false);
+  }
+  state.tiles = tiles;
+  describeMission();
+  render();
+}
+
+function randOf(s){ return s[Math.floor(Math.random()*s.length)]; }
+
+const FACTS = {
+  pt:[ 'no alfabeto {e,1}, uma chave de 64 símbolos tem 64 bits de entropia — descobrível por design.',
+       'e e 1 são dígitos hexadecimais válidos: toda string {e,1} de 64 chars é uma chave Ethereum sintática.',
+       'a codificação Blockz10 conta os runs: eee11 → 311, compressão sem perda.',
+       'na Lottery yourToken o segredo é só a ORDEM: os 30 caracteres são públicos, embaralhados.'],
+  en:[ 'in the {e,1} alphabet, a 64-symbol key carries 64 bits of entropy — discoverable by design.',
+       'e and 1 are valid hex digits: every 64-char {e,1} string is a syntactic Ethereum key.',
+       'the Blockz10 encoding counts runs: eee11 → 311, lossless compression.',
+       'in Lottery yourToken the secret is only the ORDER: all 30 characters are public, shuffled.'],
+};
+
+function describeMission(){
+  const en = EN(), m = state.mode, n = state.phase;
+  const T = { pt:['CAÇA {e,1}','SÓ HEXADECIMAL','CODIFICAÇÃO 311','ANAGRAMA CRIPTO'],
+              en:['{e,1} HUNT','HEX ONLY','311 ENCODING','CRYPTO ANAGRAM'] }[en?'en':'pt'][m];
+  $('m-title').textContent = `${en?'PHASE':'FASE'} ${n} · ${T}`;
+  let goal='', seq='';
+  if(m===0) goal = en?`kill ${state.targetsLeft} tiles of e or 1 — ignore every other letter`
+                    :`mate ${state.targetsLeft} tiles de e ou 1 — ignore as outras letras`;
+  if(m===1) goal = en?`kill ${state.targetsLeft} HEXADECIMAL characters (0–9, a–f) — g to z are traps`
+                    :`mate ${state.targetsLeft} caracteres HEXADECIMAIS (0–9, a–f) — g a z são armadilhas`;
+  if(m===2){ goal = en?`encode the string: kill the Blockz10 form of`
+                     :`codifique a string: mate a forma Blockz10 de`;
+             seq = `${state.src} → ` + state.need.map((c,i)=> i<state.needPos?`<b>${c}</b>`:'·').join(' '); }
+  if(m===3){ goal = en?'spell the crypto word by killing its letters IN ORDER'
+                     :'soletre a palavra cripto matando as letras NA ORDEM';
+             seq = state.need.map((c,i)=> i<state.needPos?`<b>${c.toUpperCase()}</b>`:'·').join(' '); }
+  $('m-goal').textContent = goal;
+  $('m-seq').innerHTML = seq;
+  $('m-fact').textContent = '💡 ' + FACTS[en?'en':'pt'][m];
+}
+
+/* ---------------- rendering ---------------- */
+function render(){
+  const b = $('board');
+  b.innerHTML = '';
+  state.tiles.forEach((t, k)=>{
+    const d = document.createElement('div');
+    if(t){ d.className='tile pop'; d.textContent=t.ch; d.onclick=()=>tryKill(k); }
+    else { d.className='tile empty'; d.textContent='·'; }
+    b.appendChild(d);
+  });
+}
+function hud(){
+  $('hud-qi').textContent = state.qi;
+  $('hud-qi').className = 'v ' + (state.qi>=100?'gold':state.qi>=60?'':'warn');
+  $('hud-fase').textContent = state.phase;
+  $('hud-timer').textContent = state.timeLeft.toFixed(1);
+  $('hud-combo').textContent = '×'+state.combo;
+  const mm = Math.floor(state.chrono/60), ss = String(Math.floor(state.chrono%60)).padStart(2,'0');
+  $('hud-chrono').textContent = `${mm}:${ss}`;
+  $('timefill').style.width = (state.timeLeft/state.timeMax*100)+'%';
+  $('timefill').style.background = state.timeLeft < state.timeMax*.25 ? 'var(--red)' : 'var(--green)';
+}
+function flash(txt, color){
+  const f = $('flash');
+  f.textContent = txt; f.style.color = color;
+  f.style.opacity = 1; f.style.top = '70px';
+  setTimeout(()=>{ f.style.opacity = 0; f.style.top = '46px'; }, 420);
+}
+
+/* ---------------- kill logic ---------------- */
+function tryKill(k){
+  if(!state.running) return;
+  const t = state.tiles[k];
+  if(!t) return;
+  const seqMode = state.mode===2 || state.mode===3;
+  const valid = seqMode ? t.ch === state.need[state.needPos] : t.target;
+  if(valid) kill(k);
+  else penalize(k);
+}
+function keyKill(ch){
+  if(!state.running) return;
+  const seqMode = state.mode===2 || state.mode===3;
+  if(seqMode){
+    if(ch === state.need[state.needPos]){
+      const k = state.tiles.findIndex(t=>t && t.ch===ch);
+      if(k>=0) kill(k);
+    } else if(state.tiles.some(t=>t && t.ch===ch)){
+      const k = state.tiles.findIndex(t=>t && t.ch===ch);
+      penalize(k);
+    }
+  } else {
+    const k = state.tiles.findIndex(t=>t && t.ch===ch && t.target);
+    if(k>=0) kill(k);
+    else {
+      const kd = state.tiles.findIndex(t=>t && t.ch===ch);
+      if(kd>=0) penalize(kd);
+    }
+  }
+}
+function kill(k){
+  const cell = $('board').children[k];
+  cell.classList.add('dead');
+  state.tiles[k] = null;
+  state.kills++;
+  const speed = state.timeLeft/state.timeMax;
+  const pts = Math.round((3 + 5*speed) * state.combo);
+  state.qi += pts;
+  state.combo = Math.min(9, state.combo+ (state.kills%3===0?1:0));
+  flash('+'+pts+' QI', 'var(--green)');
+  if(state.mode<=1){
+    state.targetsLeft--;
+    // respawn: keep the hunt alive — one new tile, target odds shrink with time
+    setTimeout(()=>{ if(!state.running) return;
+      const empty=[...state.tiles.keys()].filter(i=>!state.tiles[i]);
+      if(empty.length){
+        const i = empty[Math.floor(Math.random()*empty.length)];
+        const isT = Math.random() < .55;
+        state.tiles[i] = state.mode===0
+          ? { ch: isT ? (Math.random()<.5?'e':'1') : randOf('abcdfghjkmnpqrstuvwxyz23456789'), target:isT }
+          : { ch: isT ? randOf(HEX) : randOf(NONHEX), target:isT };
+        render();
+      }
+    }, 260);
+  } else {
+    state.needPos++;
+    state.targetsLeft--;
+    describeMission();
+  }
+  hud();
+  if(state.targetsLeft<=0) phaseClear();
+}
+function penalize(k){
+  const cell = $('board').children[k];
+  cell.classList.add('err');
+  setTimeout(()=>cell.classList.remove('err'), 320);
+  state.errors++;
+  state.qi = Math.max(0, state.qi-8);
+  state.combo = 1;
+  state.timeLeft = Math.max(0.5, state.timeLeft-2);
+  flash('-8 QI', 'var(--red)');
+  hud();
+}
+function phaseClear(){
+  const bonus = 10 + Math.round(state.timeLeft);
+  state.qi += bonus;
+  flash((EN()?'PHASE CLEAR +':'FASE VENCIDA +')+bonus+' QI', 'var(--gold)');
+  state.phase++;
+  genPhase(state.phase);
+  hud();
+}
+
+/* ---------------- loop ---------------- */
+function tick(now){
+  if(!state.running) return;
+  const dt = (now - state.lastTick)/1000;
+  state.lastTick = now;
+  state.timeLeft -= dt;
+  state.chrono += dt;
+  if(state.timeLeft <= 0){ gameOver(); return; }
+  hud();
+  requestAnimationFrame(tick);
+}
+
+function startGame(){
+  state.running = true; state.phase = 1; state.qi = 100; state.combo = 1;
+  state.kills = 0; state.errors = 0; state.chrono = 0;
+  $('overlay').classList.add('hide');
+  genPhase(1); hud();
+  state.lastTick = performance.now();
+  requestAnimationFrame(tick);
+}
+
+function gameOver(){
+  state.running = false;
+  const en = EN();
+  $('panel-start').style.display='none';
+  $('panel-over').style.display='block';
+  $('overlay').classList.remove('hide');
+  $('f-qi').textContent = state.qi;
+  const ranks = en
+    ? [[220,'⛓ CRYPTOGRAPHER OF THE PYRAMID'],[170,'🔐 BLOCK MASTER'],[130,'🧩 ANAGRAM HUNTER'],[100,'📗 {e,1} APPRENTICE'],[0,'🌱 GENESIS BLOCK']]
+    : [[220,'⛓ CRIPTÓGRAFO DA PIRÂMIDE'],[170,'🔐 MESTRE DOS BLOCOS'],[130,'🧩 CAÇADOR DE ANAGRAMAS'],[100,'📗 APRENDIZ {e,1}'],[0,'🌱 BLOCO GÊNESIS']];
+  $('f-rank').textContent = ranks.find(r=>state.qi>=r[0])[1];
+  const mm = Math.floor(state.chrono/60), ss = String(Math.floor(state.chrono%60)).padStart(2,'0');
+  $('f-stats').textContent = en
+    ? `phases: ${state.phase} · kills: ${state.kills} · errors: ${state.errors} · time: ${mm}:${ss}`
+    : `fases: ${state.phase} · abates: ${state.kills} · erros: ${state.errors} · tempo: ${mm}:${ss}`;
+  let best = 0;
+  try{
+    best = +(localStorage.getItem('bz-arcade-best')||0);
+    if(state.qi > best){ best = state.qi; localStorage.setItem('bz-arcade-best', best); }
+  }catch(e){}
+  $('f-best').textContent = (en?'RECORD: ':'RECORDE: ') + best + ' QI';
+}
+
+function showBest(){
+  let best = 0;
+  try{ best = +(localStorage.getItem('bz-arcade-best')||0); }catch(e){}
+  $('best-line').textContent = best ? (EN()?'RECORD: ':'RECORDE: ') + best + ' QI' : '';
+}
+
+/* ---------------- input ---------------- */
+document.addEventListener('keydown', e=>{
+  if(e.key.length===1) keyKill(e.key.toLowerCase());
+});
+
+/* ---------------- boot ---------------- */
+try{
+  const saved = localStorage.getItem('bz-arcade-lang');
+  if(saved) setLang(saved);
+  else if((navigator.language||'').toLowerCase().indexOf('pt')!==0) setLang('en');
+}catch(e){}
+showBest();
+// idle board preview behind the start panel
+(function(){
+  const tiles = new Array(CELLS).fill(null);
+  const chars = 'e1e1e1' + 'abcdef0123456789';
+  for(let i=0;i<18;i++){
+    let k; do{ k=Math.floor(Math.random()*CELLS); }while(tiles[k]);
+    tiles[k] = { ch: chars[Math.floor(Math.random()*chars.length)], target:false };
+  }
+  state.tiles = tiles; render();
+})();
+</script>
+</body>
+</html>
