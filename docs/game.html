@@ -119,8 +119,8 @@ html.en [data-en]{display:revert}
   </div>
 
   <div id="board"></div>
-  <div class="hint" data-pt>⌨ digite a letra para matá-la · 🖱 ou clique no tile · erro custa QI e tempo</div>
-  <div class="hint" data-en>⌨ type the letter to kill it · 🖱 or click the tile · mistakes cost IQ and time</div>
+  <div class="hint" data-pt>⌨ digite a letra (ou 🖱 clique no tile) seguindo a SEQUÊNCIA do painel — a letra que pisca é a próxima · erro custa QI e tempo</div>
+  <div class="hint" data-en>⌨ type the letter (or 🖱 click the tile) following the panel SEQUENCE — the blinking letter is next · mistakes cost IQ and time</div>
 </div>
 
 <div id="overlay">
@@ -209,19 +209,15 @@ function genPhase(n){
     tiles[k] = { ch, target: cls };
   };
 
-  if(mode===0){ // hunt {e,1}
-    state.targetsLeft = 8 + Math.min(10, lvl*2);
-    const nT = Math.min(10, 5 + lvl);
-    for(let i=0;i<nT;i++) put(Math.random()<.5?'e':'1', true);
-    const nD = Math.min(CELLS-nT, 10 + lvl*3);
-    for(let i=0;i<nD;i++) put(randOf('abcdfghjkmnpqrstuvwxyz23456789'), false);
-  }
-  else if(mode===1){ // hex only
-    state.targetsLeft = 8 + Math.min(10, lvl*2);
-    const nT = Math.min(10, 5 + lvl);
-    for(let i=0;i<nT;i++) put(randOf(HEX), true);
-    const nD = Math.min(CELLS-nT, 10 + lvl*3);
-    for(let i=0;i<nD;i++) put(randOf(NONHEX), false);
+  if(mode===0 || mode===1){ // ordered hunt: {e,1} or hex
+    const pool   = mode===0 ? 'e1' : HEX;
+    state.decoys = mode===0 ? 'abcdfghjkmnpqrstuvwxyz23456789' : NONHEX;
+    const nNeed = 8 + Math.min(10, lvl*2);
+    for(let i=0;i<nNeed;i++) state.need.push(randOf(pool));
+    state.targetsLeft = nNeed;
+    for(const ch of state.need.slice(0, 12)) put(ch, true);
+    const nD = Math.min(CELLS-12, 8 + lvl*3);
+    for(let i=0;i<nD;i++) put(randOf(state.decoys), false);
   }
   else if(mode===2){ // encode: kill the Blockz10 form of a shown {e,1} string, in order
     let src=''; const len = Math.min(9, 4 + lvl);
@@ -245,6 +241,7 @@ function genPhase(n){
   state.tiles = tiles;
   describeMission();
   render();
+  ensureNext();
 }
 
 function randOf(s){ return s[Math.floor(Math.random()*s.length)]; }
@@ -265,23 +262,20 @@ function describeMission(){
   const T = { pt:['CAÇA {e,1}','SÓ HEXADECIMAL','CODIFICAÇÃO 311','ANAGRAMA CRIPTO'],
               en:['{e,1} HUNT','HEX ONLY','311 ENCODING','CRYPTO ANAGRAM'] }[en?'en':'pt'][m];
   $('m-title').textContent = `${en?'PHASE':'FASE'} ${n} · ${T}`;
-  let goal='', seq='';
-  if(m===0) goal = en?`kill ${state.targetsLeft} tiles of e or 1 — ignore every other letter`
-                    :`mate ${state.targetsLeft} tiles de e ou 1 — ignore as outras letras`;
-  if(m===1) goal = en?`kill ${state.targetsLeft} HEXADECIMAL characters (0–9, a–f) — g to z are traps`
-                    :`mate ${state.targetsLeft} caracteres HEXADECIMAIS (0–9, a–f) — g a z são armadilhas`;
-  if(m===2){ goal = en?`encode it yourself (runs of e become a digit · 1 stays): kill the Blockz10 form of`
-                     :`codifique você mesmo (runs de e viram número · 1 fica literal): mate a forma Blockz10 de`;
-             seq = `${state.src} → ` + state.need.map((c,i)=>
-               i<state.needPos ? `<b>${c}</b>`
-               : (i===state.needPos && state.hinted) ? `<span class="hintc">${c}</span>`
-               : '·').join(' '); }
-  if(m===3){ goal = en?'find and kill the letters of the word below, IN ORDER'
-                     :'ache e mate as letras da palavra abaixo, NA ORDEM';
-             seq = state.need.map((c,i)=>
-               i<state.needPos ? `<b>${c.toUpperCase()}</b>`
-               : i===state.needPos ? `<span class="nx">${c.toUpperCase()}</span>`
-               : c.toUpperCase()).join(' '); }
+  let goal='';
+  if(m===0) goal = en?'kill the {e,1} letters below IN ORDER — the blinking one is next'
+                    :'mate as letras {e,1} abaixo NA ORDEM — a que pisca é a próxima';
+  if(m===1) goal = en?'kill the HEXADECIMAL characters below IN ORDER (0–9, a–f) — g to z are traps'
+                    :'mate os caracteres HEXADECIMAIS abaixo NA ORDEM (0–9, a–f) — g a z são armadilhas';
+  if(m===2) goal = en?'the Blockz10 form (runs of e become a digit · 1 stays) — kill it IN ORDER'
+                    :'a forma Blockz10 (runs de e viram número · 1 fica literal) — mate NA ORDEM';
+  if(m===3) goal = en?'find and kill the letters of the word below, IN ORDER'
+                    :'ache e mate as letras da palavra abaixo, NA ORDEM';
+  const disp = c => m===3 ? c.toUpperCase() : c;
+  const seq = (m===2 ? `${state.src} → ` : '') + state.need.map((c,i)=>
+      i<state.needPos ? `<b>${disp(c)}</b>`
+    : i===state.needPos ? `<span class="nx">${disp(c)}</span>`
+    : disp(c)).join(' ');
   $('m-goal').textContent = goal;
   $('m-seq').innerHTML = seq;
   $('m-fact').textContent = '💡 ' + FACTS[en?'en':'pt'][m];
@@ -321,30 +315,30 @@ function tryKill(k){
   if(!state.running) return;
   const t = state.tiles[k];
   if(!t) return;
-  const seqMode = state.mode===2 || state.mode===3;
-  const valid = seqMode ? t.ch === state.need[state.needPos] : t.target;
-  if(valid) kill(k);
+  if(t.ch === state.need[state.needPos]) kill(k);
   else penalize(k);
 }
 function keyKill(ch){
   if(!state.running) return;
-  const seqMode = state.mode===2 || state.mode===3;
-  if(seqMode){
-    if(ch === state.need[state.needPos]){
-      const k = state.tiles.findIndex(t=>t && t.ch===ch);
-      if(k>=0) kill(k);
-    } else if(state.tiles.some(t=>t && t.ch===ch)){
-      const k = state.tiles.findIndex(t=>t && t.ch===ch);
-      penalize(k);
-    }
-  } else {
-    const k = state.tiles.findIndex(t=>t && t.ch===ch && t.target);
-    if(k>=0) kill(k);
-    else {
-      const kd = state.tiles.findIndex(t=>t && t.ch===ch);
-      if(kd>=0) penalize(kd);
-    }
+  const k = state.tiles.findIndex(t=>t && t.ch===ch);
+  if(k < 0) return;
+  if(ch === state.need[state.needPos]) kill(k);
+  else penalize(k);
+}
+function ensureNext(){
+  // the next required character must always exist on the board
+  if(state.needPos >= state.need.length) return;
+  const ch = state.need[state.needPos];
+  if(state.tiles.some(t=>t && t.ch===ch)) return;
+  const empty = [...state.tiles.keys()].filter(i=>!state.tiles[i]);
+  let i;
+  if(empty.length) i = empty[Math.floor(Math.random()*empty.length)];
+  else {
+    const repl = [...state.tiles.keys()].filter(j=>state.tiles[j].ch!==ch);
+    i = repl[Math.floor(Math.random()*repl.length)];
   }
+  state.tiles[i] = { ch, target:true };
+  render();
 }
 function kill(k){
   const cell = $('board').children[k];
@@ -356,27 +350,25 @@ function kill(k){
   state.qi += pts;
   state.combo = Math.min(9, state.combo+ (state.kills%3===0?1:0));
   flash('+'+pts+' QI', 'var(--green)');
+  state.needPos++;
+  state.targetsLeft--;
+  state.lastProgress = performance.now();
+  describeMission();
   if(state.mode<=1){
-    state.targetsLeft--;
-    // respawn: keep the hunt alive — one new tile, target odds shrink with time
+    // respawn: keep the hunt board alive — one new tile after each kill
     setTimeout(()=>{ if(!state.running) return;
       const empty=[...state.tiles.keys()].filter(i=>!state.tiles[i]);
       if(empty.length){
         const i = empty[Math.floor(Math.random()*empty.length)];
-        const isT = Math.random() < .55;
-        state.tiles[i] = state.mode===0
-          ? { ch: isT ? (Math.random()<.5?'e':'1') : randOf('abcdfghjkmnpqrstuvwxyz23456789'), target:isT }
-          : { ch: isT ? randOf(HEX) : randOf(NONHEX), target:isT };
+        const isT = Math.random() < .45;
+        const pool = state.mode===0 ? 'e1' : HEX;
+        state.tiles[i] = { ch: isT ? randOf(pool) : randOf(state.decoys), target:isT };
         render();
       }
+      ensureNext();
     }, 260);
-  } else {
-    state.needPos++;
-    state.targetsLeft--;
-    state.hinted = false;
-    state.lastProgress = performance.now();
-    describeMission();
   }
+  ensureNext();
   hud();
   if(state.targetsLeft<=0) phaseClear();
 }
@@ -408,11 +400,6 @@ function tick(now){
   state.timeLeft -= dt;
   state.chrono += dt;
   if(state.timeLeft <= 0){ gameOver(); return; }
-  // stuck on the encoding puzzle? auto-reveal the next symbol after 5s
-  if(state.mode===2 && !state.hinted && now - state.lastProgress > 5000){
-    state.hinted = true;
-    describeMission();
-  }
   hud();
   requestAnimationFrame(tick);
 }
@@ -460,12 +447,9 @@ function showHint(){
   if(!state.running) return;
   state.qi = Math.max(0, state.qi-3);
   flash('-3 QI', 'var(--grey)');
-  const seqMode = state.mode===2 || state.mode===3;
   const board = $('board');
   state.tiles.forEach((t,k)=>{
-    if(!t) return;
-    const valid = seqMode ? t.ch === state.need[state.needPos] : t.target;
-    if(valid) board.children[k].classList.add('hint');
+    if(t && t.ch === state.need[state.needPos]) board.children[k].classList.add('hint');
   });
   setTimeout(()=>{ [...board.children].forEach(c=>c.classList.remove('hint')); }, 1200);
   hud();
