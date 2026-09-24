@@ -60,6 +60,11 @@ caracteres embaralhados. Qualquer um pode aumentar o prêmio depositando
 tokens; quem reordenar os caracteres leva tudo. Uma caça ao tesouro
 verificável e **colaborativamente inflável**.
 
+> 🎰 **Repositório oficial / official repository:**
+> [elevbit-ai/lottery-yourtoken](https://github.com/elevbit-ai/lottery-yourtoken) —
+> especificação formal, implementações Python + JavaScript, demo jogável e
+> vídeo em [elevbit-ai.github.io/lottery-yourtoken](https://elevbit-ai.github.io/lottery-yourtoken/).
+
 ### 3 · Block 15/5 — a anti-pirâmide
 
 15 blocos de valor 10 em 5 níveis + bloco de origem (valor 0). Total 150.
